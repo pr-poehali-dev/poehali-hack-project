@@ -5,280 +5,322 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import Icon from "@/components/ui/icon";
 
-interface Product {
+interface StarPackage {
   id: number;
   name: string;
+  stars: number;
   price: number;
+  originalPrice?: number;
+  discount?: number;
+  popular?: boolean;
   image: string;
-  sizes: string[];
-  category: string;
-  inStock: boolean;
+  description: string;
 }
 
-const products: Product[] = [
+const starPackages: StarPackage[] = [
   {
     id: 1,
-    name: "Премиум модель",
-    price: 2999,
-    image: "/img/ded44480-b283-4c5d-9479-38f1048fab16.jpg",
-    sizes: ["S", "M", "L", "XL"],
-    category: "premium",
-    inStock: true,
+    name: "Стартовый",
+    stars: 100,
+    price: 150,
+    originalPrice: 200,
+    discount: 25,
+    image: "/img/a71bd836-0fa9-426f-b53e-1ec9f39cd581.jpg",
+    description: "Идеально для начинающих"
   },
   {
     id: 2,
-    name: "Градиент модель",
-    price: 2499,
-    image: "/img/75ac3a8e-9521-4452-8cc2-b14ba78bc53f.jpg",
-    sizes: ["M", "L", "XL", "XXL"],
-    category: "gradient",
-    inStock: true,
+    name: "Популярный",
+    stars: 500,
+    price: 650,
+    originalPrice: 900,
+    discount: 28,
+    popular: true,
+    image: "/img/1e601c17-90a9-4075-bf28-2990021b803f.jpg",
+    description: "Лучшее соотношение цена/качество"
   },
   {
     id: 3,
-    name: "Яркая модель",
-    price: 1999,
-    image: "/img/a4a93246-c2be-41eb-b96f-1d416a33fced.jpg",
-    sizes: ["S", "M", "L"],
-    category: "bright",
-    inStock: false,
+    name: "Премиум",
+    stars: 1000,
+    price: 1200,
+    originalPrice: 1800,
+    discount: 33,
+    image: "/img/e193460d-a4ec-4784-8f6d-fa44159a167b.jpg",
+    description: "Максимальная выгода"
   },
+  {
+    id: 4,
+    name: "Мини",
+    stars: 50,
+    price: 80,
+    image: "/img/a71bd836-0fa9-426f-b53e-1ec9f39cd581.jpg",
+    description: "Попробовать звёзды"
+  },
+  {
+    id: 5,
+    name: "Мега",
+    stars: 2500,
+    price: 2800,
+    originalPrice: 4500,
+    discount: 38,
+    image: "/img/1e601c17-90a9-4075-bf28-2990021b803f.jpg",
+    description: "Для серьёзных проектов"
+  }
 ];
 
 const Index = () => {
-  const [filteredProducts, setFilteredProducts] = useState(products);
-  const [selectedSize, setSelectedSize] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [priceRange, setPriceRange] = useState([0, 5000]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showOnlyInStock, setShowOnlyInStock] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<StarPackage | null>(null);
+  const [orderForm, setOrderForm] = useState({
+    username: "",
+    email: "",
+    telegramId: "",
+    paymentMethod: "",
+    notes: ""
+  });
+  const [isOrderOpen, setIsOrderOpen] = useState(false);
 
-  const handleFilter = () => {
-    let filtered = products;
-
-    if (selectedSize) {
-      filtered = filtered.filter(product => product.sizes.includes(selectedSize));
-    }
-
-    if (selectedCategory) {
-      filtered = filtered.filter(product => product.category === selectedCategory);
-    }
-
-    filtered = filtered.filter(product => 
-      product.price >= priceRange[0] && product.price <= priceRange[1]
-    );
-
-    if (searchQuery) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (showOnlyInStock) {
-      filtered = filtered.filter(product => product.inStock);
-    }
-
-    setFilteredProducts(filtered);
+  const handleOrderSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert(`Заказ оформлен! Пакет: ${selectedPackage?.name}, Звёзд: ${selectedPackage?.stars}, Цена: ${selectedPackage?.price}₽`);
+    setIsOrderOpen(false);
+    setOrderForm({ username: "", email: "", telegramId: "", paymentMethod: "", notes: "" });
   };
 
-  const resetFilters = () => {
-    setSelectedSize("");
-    setSelectedCategory("");
-    setPriceRange([0, 5000]);
-    setSearchQuery("");
-    setShowOnlyInStock(false);
-    setFilteredProducts(products);
+  const openOrderDialog = (pkg: StarPackage) => {
+    setSelectedPackage(pkg);
+    setIsOrderOpen(true);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-primary mb-4">
-            🛍️ Интернет-магазин
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Качественные товары с доставкой по всей России
+          <div className="flex justify-center items-center gap-3 mb-4">
+            <div className="text-5xl">⭐</div>
+            <h1 className="text-4xl font-bold text-primary">
+              Telegram Stars
+            </h1>
+            <div className="text-5xl">⭐</div>
+          </div>
+          <p className="text-xl text-muted-foreground mb-2">
+            Купить звёзды Telegram по самым низким ценам
+          </p>
+          <p className="text-lg text-primary font-semibold">
+            💫 Моментальная доставка • 🔒 Безопасно • 💰 Лучшие цены
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <aside className="lg:col-span-1">
-            <Card className="sticky top-4">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Icon name="Filter" size={20} />
-                  Фильтры
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <Label htmlFor="search">Поиск</Label>
-                  <Input
-                    id="search"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Найти товар..."
-                    className="mt-1"
+        <div className="mb-12 text-center">
+          <Card className="max-w-4xl mx-auto bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
+            <CardContent className="p-8">
+              <h2 className="text-2xl font-bold mb-4">🚀 Зачем нужны звёзды Telegram?</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl mb-2">🎁</div>
+                  <h3 className="font-semibold mb-2">Подарки в каналах</h3>
+                  <p className="text-sm opacity-90">Отправляйте подарки подписчикам</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl mb-2">💎</div>
+                  <h3 className="font-semibold mb-2">Премиум функции</h3>
+                  <p className="text-sm opacity-90">Доступ к эксклюзивному контенту</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl mb-2">🏆</div>
+                  <h3 className="font-semibold mb-2">Поддержка авторов</h3>
+                  <p className="text-sm opacity-90">Благодарите за качественный контент</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-center mb-8">📦 Выберите пакет звёзд</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {starPackages.map((pkg) => (
+              <Card 
+                key={pkg.id} 
+                className={`relative group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 ${
+                  pkg.popular ? 'ring-2 ring-primary ring-offset-2' : ''
+                }`}
+              >
+                {pkg.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-primary text-primary-foreground px-4 py-1">
+                      🔥 ПОПУЛЯРНЫЙ
+                    </Badge>
+                  </div>
+                )}
+                
+                {pkg.discount && (
+                  <div className="absolute top-4 right-4">
+                    <Badge variant="destructive" className="font-bold">
+                      -{pkg.discount}%
+                    </Badge>
+                  </div>
+                )}
+
+                <div className="p-2">
+                  <img
+                    src={pkg.image}
+                    alt={pkg.name}
+                    className="w-full h-32 object-cover rounded-lg group-hover:scale-105 transition-transform"
                   />
                 </div>
 
-                <div>
-                  <Label>Размер</Label>
-                  <Select value={selectedSize} onValueChange={setSelectedSize}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Выберите размер" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Все размеры</SelectItem>
-                      <SelectItem value="S">S</SelectItem>
-                      <SelectItem value="M">M</SelectItem>
-                      <SelectItem value="L">L</SelectItem>
-                      <SelectItem value="XL">XL</SelectItem>
-                      <SelectItem value="XXL">XXL</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <CardHeader className="text-center pb-2">
+                  <CardTitle className="text-xl">{pkg.name}</CardTitle>
+                  <div className="text-3xl font-bold text-primary">⭐ {pkg.stars.toLocaleString()}</div>
+                  <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                </CardHeader>
 
-                <div>
-                  <Label>Категория</Label>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Выберите категорию" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Все категории</SelectItem>
-                      <SelectItem value="premium">Премиум</SelectItem>
-                      <SelectItem value="gradient">Градиент</SelectItem>
-                      <SelectItem value="bright">Яркие</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label>Цена: {priceRange[0]} - {priceRange[1]} ₽</Label>
-                  <Slider
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    max={5000}
-                    min={0}
-                    step={100}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="inStock"
-                    checked={showOnlyInStock}
-                    onChange={(e) => setShowOnlyInStock(e.target.checked)}
-                    className="rounded border-gray-300"
-                  />
-                  <Label htmlFor="inStock">Только в наличии</Label>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button onClick={handleFilter} className="flex-1">
-                    <Icon name="Search" size={16} className="mr-2" />
-                    Применить
-                  </Button>
-                  <Button onClick={resetFilters} variant="outline">
-                    <Icon name="RotateCcw" size={16} />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </aside>
-
-          <main className="lg:col-span-3">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold">
-                Каталог товаров ({filteredProducts.length})
-              </h2>
-              <Select defaultValue="price-asc">
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="price-asc">Цена: по возрастанию</SelectItem>
-                  <SelectItem value="price-desc">Цена: по убыванию</SelectItem>
-                  <SelectItem value="name">По названию</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredProducts.map((product) => (
-                <Card key={product.id} className="group hover:shadow-lg transition-shadow">
-                  <div className="relative overflow-hidden rounded-t-lg">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    {!product.inStock && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <Badge variant="destructive">Нет в наличии</Badge>
+                <CardContent className="text-center">
+                  <div className="mb-4">
+                    {pkg.originalPrice && (
+                      <div className="text-sm text-muted-foreground line-through">
+                        {pkg.originalPrice}₽
                       </div>
                     )}
+                    <div className="text-2xl font-bold text-primary">
+                      {pkg.price}₽
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {(pkg.price / pkg.stars).toFixed(2)}₽ за звезду
+                    </div>
                   </div>
-                  
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-lg">{product.name}</h3>
-                      <Badge variant="secondary">{product.category}</Badge>
-                    </div>
-                    
-                    <p className="text-2xl font-bold text-primary mb-3">
-                      {product.price.toLocaleString()} ₽
-                    </p>
-                    
-                    <div className="mb-4">
-                      <Label className="text-sm font-medium">Размеры:</Label>
-                      <div className="flex gap-2 mt-1">
-                        {product.sizes.map((size) => (
-                          <Badge key={size} variant="outline" className="text-xs">
-                            {size}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button 
-                        className="flex-1" 
-                        disabled={!product.inStock}
-                      >
-                        <Icon name="ShoppingCart" size={16} className="mr-2" />
-                        В корзину
-                      </Button>
-                      <Button variant="outline" size="icon">
-                        <Icon name="Heart" size={16} />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
 
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-12">
-                <Icon name="Package" size={64} className="mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Товары не найдены</h3>
-                <p className="text-muted-foreground mb-4">
-                  Попробуйте изменить параметры поиска
-                </p>
-                <Button onClick={resetFilters}>
-                  Сбросить фильтры
-                </Button>
+                  <Button 
+                    onClick={() => openOrderDialog(pkg)}
+                    className="w-full group-hover:scale-105 transition-transform"
+                    size="lg"
+                  >
+                    <Icon name="ShoppingCart" size={16} className="mr-2" />
+                    Купить сейчас
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <Card className="text-center p-6">
+            <div className="text-4xl mb-4">⚡</div>
+            <h3 className="font-bold text-lg mb-2">Моментальная доставка</h3>
+            <p className="text-muted-foreground">Звёзды поступят на ваш аккаунт в течение 5 минут</p>
+          </Card>
+          <Card className="text-center p-6">
+            <div className="text-4xl mb-4">🔐</div>
+            <h3 className="font-bold text-lg mb-2">Полная безопасность</h3>
+            <p className="text-muted-foreground">Официальные методы, без риска блокировки</p>
+          </Card>
+          <Card className="text-center p-6">
+            <div className="text-4xl mb-4">💰</div>
+            <h3 className="font-bold text-lg mb-2">Лучшие цены</h3>
+            <p className="text-muted-foreground">Самые выгодные тарифы на рынке</p>
+          </Card>
+        </div>
+
+        <Dialog open={isOrderOpen} onOpenChange={setIsOrderOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Icon name="Star" size={20} />
+                Оформление заказа
+              </DialogTitle>
+            </DialogHeader>
+            
+            {selectedPackage && (
+              <div className="space-y-4">
+                <div className="bg-secondary p-4 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">{selectedPackage.name}</span>
+                    <Badge>⭐ {selectedPackage.stars}</Badge>
+                  </div>
+                  <div className="text-2xl font-bold text-primary mt-2">
+                    {selectedPackage.price}₽
+                  </div>
+                </div>
+
+                <form onSubmit={handleOrderSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="username">Имя пользователя Telegram *</Label>
+                    <Input
+                      id="username"
+                      value={orderForm.username}
+                      onChange={(e) => setOrderForm({...orderForm, username: e.target.value})}
+                      placeholder="@username"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="email">Email *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={orderForm.email}
+                      onChange={(e) => setOrderForm({...orderForm, email: e.target.value})}
+                      placeholder="your@email.com"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="telegramId">ID Telegram (необязательно)</Label>
+                    <Input
+                      id="telegramId"
+                      value={orderForm.telegramId}
+                      onChange={(e) => setOrderForm({...orderForm, telegramId: e.target.value})}
+                      placeholder="123456789"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Способ оплаты *</Label>
+                    <Select 
+                      value={orderForm.paymentMethod} 
+                      onValueChange={(value) => setOrderForm({...orderForm, paymentMethod: value})}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите способ оплаты" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="card">💳 Банковская карта</SelectItem>
+                        <SelectItem value="qiwi">🥝 QIWI</SelectItem>
+                        <SelectItem value="yoomoney">💰 ЮMoney</SelectItem>
+                        <SelectItem value="crypto">₿ Криптовалюта</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="notes">Дополнительные пожелания</Label>
+                    <Textarea
+                      id="notes"
+                      value={orderForm.notes}
+                      onChange={(e) => setOrderForm({...orderForm, notes: e.target.value})}
+                      placeholder="Укажите особые пожелания..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <Button type="submit" className="w-full" size="lg">
+                    <Icon name="CreditCard" size={16} className="mr-2" />
+                    Оплатить {selectedPackage.price}₽
+                  </Button>
+                </form>
               </div>
             )}
-          </main>
-        </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
